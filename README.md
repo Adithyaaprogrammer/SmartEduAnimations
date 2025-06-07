@@ -1,0 +1,2 @@
+# SmartEduAnimations
+A Project for the Educational Purpose in order to convert the Education Content or Prompt or Questions into a full fletched video solution
