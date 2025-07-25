@@ -1,27 +1,26 @@
-from langchain.llms import HuggingFacePipeline
 from langchain_groq import ChatGroq
-from transformers import pipeline
 import os
 import dotenv 
-
-dotenv.load_dotenv()
-os.environ["GROQ_API_KEY"] = dotenv.get_key(dotenv.find_dotenv(), "GROQ_API_KEY")
-code_pipe = pipeline("text-generation", model="codellama/CodeLlama-7b-Instruct-hf")
-code_llm = HuggingFacePipeline(pipeline=code_pipe)
+os.environ["GROQ_API_KEY"] = dotenv.get_key(".env", "GROQ_API_KEY") 
+code_llm = ChatGroq(
+    model="moonshotai/kimi-k2-instruct",
+    max_tokens=3000,
+    temperature=0.5,
+)
 
 codeproblemstatement_llm = ChatGroq(
-    model="deepseek-r1-distill-llama-70b",
-    max_tokens=1024,
-    temperature=0.7,
+    model="qwen/qwen3-32b",
+    max_tokens=3000,
+    temperature=0.5,
     max_retries=3,
-    reasoning_format="hidden",
+    # reasoning_format="hidden",
 
 )
 
 def generate_code(prompt: str) -> str:
-    response = code_llm(prompt)
+    response = code_llm.invoke(prompt)
     # HuggingFacePipeline typically returns a string directly
-    return response if isinstance(response, str) else str(response)
+    return response.content
 
 def generate_solution(problem_statement: str) -> str:
     response = codeproblemstatement_llm.invoke(problem_statement)
@@ -33,19 +32,30 @@ def code_checker(code: str) -> bool:
     return True  # Assume the code is valid for this example
 
 def main():
-    problem_statement = "explain the concept of recursion in Python with an example"
+    standard_prompt = "Please explain the above concept in a clear and detailed manner and Make the explanation beginner-friendly while ensuring technical depth. Include an example in Python that illustrates the concept effectively."
+    input = "explain the cauchy riemann equation proof"
+    problem_statement = input + standard_prompt
     solution = generate_solution(problem_statement)
-    prompt =f"Write a code in Manim to visualize the the solution for the problem statement:{problem_statement}\n and solution:{solution}"
+    print(f"Generated solution: {solution}")
+    prompt =f"""Generate only complete Manim code in Python that visually presents and solves the following problem. Do **not** include any explanation—only the full, runnable Manim code. Your animation should:
+1. Clearly state the problem at the top of the screen.
+2. Step through each part of the solution using manim codable/generatable diagrams, graphs, geometric shapes, or annotations.
+3. Use transforms, highlights, and manim generatable label animations to guide the viewer’s attention.
+4. Conclude with a final summary frame that displays the answer visually.
+ 
+Problem Statement:
+{problem_statement}
+
+Solution Outline:
+{solution}
+"""
     code = generate_code(prompt)
-    
+
     # Save the generated code to a new file
-    with open("manim_visualization.py", "w") as file:
+    with open("manim_visualization.py", "w", encoding="utf-8") as file:
         file.write(code)
-    
+
     print(f"Generated Manim code has been saved to 'manim_visualization.py'")
 
 if __name__ == "__main__":
     main()
-
-
-
