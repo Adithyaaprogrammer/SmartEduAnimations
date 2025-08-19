@@ -32,7 +32,7 @@ def code_checker(code: str) -> bool:
     return True  # Assume the code is valid for this example
 
 def main():
-    standard_prompt = "Please explain the above concept in a clear and detailed manner and Make the explanation beginner-friendly while ensuring technical depth. Include an example in Python that illustrates the concept effectively."
+    standard_prompt = "Please explain the above concept in a clear and detailed manner and Make the explanation beginner-friendly while ensuring technical depth. Include an example that illustrates the concept effectively."
     input = "explain the cauchy riemann equation proof"
     problem_statement = input + standard_prompt
     solution = generate_solution(problem_statement)
